@@ -1,7 +1,6 @@
 using System;
 using System.Text.Json;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
 
 namespace QueueTrigeredFunc
@@ -13,8 +12,9 @@ namespace QueueTrigeredFunc
         {
             log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
             DocumentInfo documentInfo = JsonSerializer.Deserialize<DocumentInfo>(myQueueItem);
-
-            log.LogInformation(documentInfo.DocumentSummary);
+            var blobToSQLWriter = new BlobToSQLWriter(Environment.GetEnvironmentVariable("db-connection-string"), new 
+                                                      BlobReader(Environment.GetEnvironmentVariable("storage-connection-string"), Environment.GetEnvironmentVariable("blob-container-name")));
+            blobToSQLWriter.WriteFileFRomBlobToDb(documentInfo);
         }
     }
 }
